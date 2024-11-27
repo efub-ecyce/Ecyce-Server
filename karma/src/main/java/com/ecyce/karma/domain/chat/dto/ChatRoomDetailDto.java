@@ -9,15 +9,17 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class ChatRoomDetailDto {
-    private Long messageId;
-    private String sender;
+    private String chatId;
+    private Long userId;
+    private String nickname;
     private String content;
     private LocalDateTime timestamp;
 
-    public static ChatRoomDetailDto from(ChatMessage chatMessage) {
+    public static ChatRoomDetailDto from(ChatMessage chatMessage, String nickname) {
         return new ChatRoomDetailDto(
-                chatMessage.getChatId(),
-                chatMessage.getSender().getNickname(),
+                chatMessage.getId(),
+                chatMessage.getUserId(),
+                nickname,
                 chatMessage.getContent(),
                 chatMessage.getTimestamp()
         );

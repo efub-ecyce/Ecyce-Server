@@ -10,6 +10,7 @@ import com.ecyce.karma.domain.chat.repository.ChatRoomRepository;
 import com.ecyce.karma.domain.user.entity.User;
 import com.ecyce.karma.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -72,9 +73,19 @@ public class ChatRoomService {
     public List<ChatRoomDetailDto> findChatRoomDetails(Long roomId, User user) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("INVALID_ROOM_ID"));
-        List<ChatMessage> messages = chatMessageRepository.findByChatRoomOrderByTimestampAsc(chatRoom);
+        if (!chatRoom.getBuyer().equals(user) && !chatRoom.getSeller().equals(user)) {
+            throw new AccessDeniedException("USER_NOT_AUTHORIZED_FOR_CHATROOM");
+        }
+        List<ChatMessage> messages = chatMessageRepository.findByRoomIdOrderByTimestampAsc(roomId);
         return messages.stream()
-                .map(ChatRoomDetailDto::from)
+                .map(message -> {
+                    // MySQL에서 닉네임 조회
+                    String nickname = userRepository.findById(message.getUserId())
+                            .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND"))
+                            .getNickname();
+
+                    return ChatRoomDetailDto.from(message, nickname);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -82,7 +93,7 @@ public class ChatRoomService {
     private List<ChatRoomListDto> mapToChatRoomListDto(List<ChatRoom> chatRooms, User currentUser) {
         return chatRooms.stream()
                 .map(chatRoom -> {
-                    ChatMessage latestMessage = chatMessageRepository.findTopByChatRoomOrderByTimestampDesc(chatRoom);
+                    ChatMessage latestMessage = chatMessageRepository.findTopByRoomIdOrderByTimestampDesc(chatRoom.getRoomId());
                     return ChatRoomListDto.from(chatRoom, latestMessage, currentUser);
                 })
                 .collect(Collectors.toList());

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,16 +24,23 @@ public class ChatMessageService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
 
+    /* 메시지 저장 */
     public ChatMessage saveMessage(ChatMessageDto dto) {
-        ChatRoom chatRoom = chatRoomRepository.findById(dto.getRoomId())
+        chatRoomRepository.findById(dto.getRoomId())
                 .orElseThrow(() -> new IllegalArgumentException("INVALID_ROOM_ID"));
 
-        User sender = userRepository.findByNickname(dto.getSender())
-                .orElseThrow(() -> new IllegalArgumentException("INVALID_SENDER_NAME " + dto.getSender()));
+        ChatMessage chatMessage = ChatMessage.builder()
+                .roomId(dto.getRoomId())
+                .userId(dto.getUserId())
+                .content(dto.getContent())
+                .type(dto.getType())
+                .timestamp(LocalDateTime.now())
+                .build();
 
-        return chatMessageRepository.save(ChatMessageDto.to(dto, chatRoom, sender));
+        return chatMessageRepository.save(chatMessage);
     }
 
+    /* 메시지 조회 */
     @Transactional(readOnly = true)
     public ChatListResponseDto findMessagesByRoomId(Long roomId, User currentUser) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
@@ -41,9 +49,15 @@ public class ChatMessageService {
         // 상대방 이름으로 방 이름 설정
         String roomName = chatRoom.getBuyer().equals(currentUser) ? chatRoom.getSeller().getNickname() : chatRoom.getBuyer().getNickname();
 
-        List<ChatMessage> messages = chatMessageRepository.findByChatRoomOrderByTimestampAsc(chatRoom);
+        List<ChatMessage> messages = chatMessageRepository.findByRoomIdOrderByTimestampAsc(roomId);
         List<ChatMessageDto> messageDtos = messages.stream()
-                .map(ChatMessageDto::from)
+                .map(message -> {
+                    // MySQL에서 닉네임 조회
+                    String nickname = userRepository.findById(message.getUserId())
+                            .orElseThrow(() -> new IllegalArgumentException("USER_NOT_FOUND"))
+                            .getNickname();
+                    return ChatMessageDto.from(message, nickname);
+                })
                 .collect(Collectors.toList());
 
         return ChatListResponseDto.of(chatRoom.getRoomId(), roomName, messageDtos);
