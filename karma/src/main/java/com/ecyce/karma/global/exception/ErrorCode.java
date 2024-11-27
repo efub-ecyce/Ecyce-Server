@@ -46,7 +46,7 @@ public enum ErrorCode {
     S3_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S3 파일 업로드 중 오류가 발생했습니다."),
     S3_DELETE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S3 파일 삭제 중 오류가 발생했습니다."),
     INVALID_FILE_EXTENSION(HttpStatus.BAD_REQUEST, "지원되지 않는 파일 확장자입니다."),
-    DUPLICATE_FILE(HttpStatus.BAD_REQUEST, "중복된 파일입니다.");
+    DUPLICATE_FILE(HttpStatus.BAD_REQUEST, "중복된 파일입니다."),
   
     // chat
     INVALID_AUTHORIZATION_HEADER(HttpStatus.BAD_REQUEST, "헤더가 없거나 형식이 유효하지 않습니다."),
