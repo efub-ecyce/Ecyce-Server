@@ -8,6 +8,7 @@ import com.ecyce.karma.domain.product.entity.Product;
 import com.ecyce.karma.domain.product.repository.ProductRepository;
 import com.ecyce.karma.domain.review.entity.Review;
 import com.ecyce.karma.domain.review.repository.ReviewRepository;
+import com.ecyce.karma.domain.user.dto.request.ModifyAddressRequest;
 import com.ecyce.karma.domain.user.dto.request.ModifyInfoRequest;
 import com.ecyce.karma.domain.user.dto.request.UserInfoRequest;
 import com.ecyce.karma.domain.user.dto.response.AllUserInfo;
@@ -15,6 +16,8 @@ import com.ecyce.karma.domain.user.dto.response.ArtistInfoResponse;
 import com.ecyce.karma.domain.user.dto.response.UserInfo;
 import com.ecyce.karma.domain.user.entity.User;
 import com.ecyce.karma.domain.user.repository.UserRepository;
+import com.ecyce.karma.global.exception.CustomException;
+import com.ecyce.karma.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -91,9 +94,22 @@ public class UserService {
 
         targetUser.updateUserInfo(request);
 
-        userRepository.save(targetUser);
+        userRepository.save(targetUser); // 기존값 유지하도록 수정해야함
 
         User updateUser = userRepository.findByUserId(user.getUserId());
         return AllUserInfo.from(updateUser);
+    }
+
+
+    /* 사용자 주소 수정 */
+    public UserInfo modifyAddress(User user, ModifyAddressRequest request) {
+
+        Address address =  addressRepository.findByUserId(user.getUserId())
+                .orElseThrow(() -> new CustomException(ErrorCode.ADDRESS_NOT_FOUND));
+
+      address.updateAddress(request);
+
+      UserInfo userInfo = UserInfo.of(user);
+      return userInfo;  // 이것도 기존값 넣어줘여겠다
     }
 }

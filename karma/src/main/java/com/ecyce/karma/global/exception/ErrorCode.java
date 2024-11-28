@@ -17,6 +17,7 @@ public enum ErrorCode {
 
     // User
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원이 존재하지 않습니다."),
+    ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND , "주소 정보를 찾을 수 없습니다."),
 
     // product
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND , "해당하는 제품을 찾을 수 없습니다."),

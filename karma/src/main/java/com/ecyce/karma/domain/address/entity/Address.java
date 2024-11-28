@@ -1,5 +1,6 @@
 package com.ecyce.karma.domain.address.entity;
 
+import com.ecyce.karma.domain.user.dto.request.ModifyAddressRequest;
 import com.ecyce.karma.domain.user.dto.request.UserInfoRequest;
 import com.ecyce.karma.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -39,12 +40,13 @@ public class Address{
         this.postalCode = postalCode;
     }
 
-    // 주소 형식 포맷팅
+    /* 주소 형식 포맷팅 */
     @Override
     public String toString() {
         return String.format("[%d] %s %s", postalCode, address1, address2);
     }
 
+    /* 초기 사용자인 경우 , 모든 주소를 update*/
     public static Address toEntity(User user , UserInfoRequest request){
         return Address.builder()
                 .user(user)
@@ -52,6 +54,19 @@ public class Address{
                 .address1(request.address1())
                 .address2(request.address2())
                 .build();
+    }
+
+    /* 주소 중 원하는 부분만 update */
+    public void updateAddress(ModifyAddressRequest request){
+        if(request.getPostalCode()!= null && request.getPostalCode().isPresent()){
+            this.postalCode = request.getPostalCode().get();
+        }
+        if(request.getAddress1()!= null && request.getAddress1().isPresent()){
+            this.address1 = request.getAddress1().get();
+        }
+        if(request.getAddress2()!= null && request.getAddress2().isPresent()){
+            this.address2 = request.getAddress2().get();
+        }
     }
 
     public void setUser(User user1){

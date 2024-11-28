@@ -5,6 +5,7 @@ import com.ecyce.karma.domain.bookmark.dto.BookmarkDto;
 import com.ecyce.karma.domain.bookmark.service.BookmarkService;
 import com.ecyce.karma.domain.product.dto.response.ProductSimpleResponse;
 import com.ecyce.karma.domain.product.service.ProductService;
+import com.ecyce.karma.domain.user.dto.request.ModifyAddressRequest;
 import com.ecyce.karma.domain.user.dto.request.ModifyInfoRequest;
 import com.ecyce.karma.domain.review.dto.ReviewResponseDto;
 import com.ecyce.karma.domain.review.service.ReviewService;
@@ -77,6 +78,13 @@ public class UserController {
         AllUserInfo allUserInfo = userService.modifyUserInfo(user , request);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(allUserInfo);
+    }
+
+    /* 사용자 주소 변경 */
+    @PatchMapping("/user/address")
+    public ResponseEntity<UserInfo> modifyUserAddress(@AuthUser User user , @RequestBody ModifyAddressRequest request){
+        UserInfo userInfo = userService.modifyAddress(user , request);
+        return ResponseEntity.status(HttpStatus.OK).body(userInfo);
     }
 
 
