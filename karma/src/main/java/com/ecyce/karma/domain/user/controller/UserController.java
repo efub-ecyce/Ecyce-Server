@@ -5,6 +5,7 @@ import com.ecyce.karma.domain.bookmark.dto.BookmarkDto;
 import com.ecyce.karma.domain.bookmark.service.BookmarkService;
 import com.ecyce.karma.domain.product.dto.response.ProductSimpleResponse;
 import com.ecyce.karma.domain.product.service.ProductService;
+import com.ecyce.karma.domain.s3.S3Uploader;
 import com.ecyce.karma.domain.user.dto.request.ModifyAddressRequest;
 import com.ecyce.karma.domain.user.dto.request.ModifyInfoRequest;
 import com.ecyce.karma.domain.review.dto.ReviewResponseDto;
@@ -16,19 +17,23 @@ import com.ecyce.karma.domain.user.dto.response.UserInfo;
 import com.ecyce.karma.domain.user.entity.User;
 import com.ecyce.karma.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
     private final BookmarkService bookmarkService;
     private final UserService userService;
     private final ProductService productService;
+    private final S3Uploader s3Uploader;
 
     /* 회원별 북마크 상품 목록 조회 */
     @GetMapping("/users/bookmarks")
@@ -66,15 +71,24 @@ public class UserController {
 
     /* 처음 가입한 사용자인 경우 , 개인 정보 저장*/
     @PostMapping("/user")
-    public ResponseEntity<UserInfo> saveNewUserInfo(@AuthUser User user , @RequestBody UserInfoRequest request){
-        UserInfo userInfo = userService.saveNewUser(user,request);
+    public ResponseEntity<UserInfo> saveNewUserInfo(@AuthUser User user ,
+                                                    @RequestPart(value= "profileImage" , required = false) MultipartFile multipartFile,
+                                                    @RequestPart(value = "request") UserInfoRequest request){
+        String url = s3Uploader.saveFile(multipartFile);
+        UserInfo userInfo = userService.saveNewUser(user,request , url);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(userInfo);
     }
 
     /* 사용자 정보 수정 */
     @PatchMapping("/user")
-    public ResponseEntity<AllUserInfo> modifyUserInfo(@AuthUser User user , @RequestBody ModifyInfoRequest request){
+    public ResponseEntity<AllUserInfo> modifyUserInfo(@AuthUser User user ,
+                                                      @RequestPart(value= "profileImage" , required = false) MultipartFile multipartFile,
+                                                      @RequestPart(value = "request") ModifyInfoRequest request){
+
+        if(multipartFile != null){
+            userService.modifyProfileImage(user  , multipartFile);
+        }
         AllUserInfo allUserInfo = userService.modifyUserInfo(user , request);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(allUserInfo);

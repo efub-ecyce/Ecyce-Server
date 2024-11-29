@@ -10,7 +10,6 @@ import com.ecyce.karma.domain.user.dto.request.UserInfoRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +43,7 @@ public class User {
     @Column(length = 200)
     private String bio;
 
+
     @Column
     private String kakaoAccessToken;
 
@@ -66,7 +66,7 @@ public class User {
     Address address;
 
     @Builder
-    public  User(String nickname , String email , String profileImage , String phoneNumber , String bio , String kakaoAccessToken, Address address){
+    public  User(String nickname , String email , String profileImage , String phoneNumber , String bio ,String kakaoAccessToken, Address address){
         this.nickname = nickname;
         this.email  = email;
         this.profileImage = profileImage;
@@ -79,6 +79,11 @@ public class User {
     /* 액세스 토큰 업데이트 */
     public void updateKakaoAccessToken(String kakaoAccessToken) {
         this.kakaoAccessToken = kakaoAccessToken;
+    }
+
+    /* 이미지 url 업데이트 */
+    public void updateProfileImage(String url){
+        this.profileImage = url;
     }
 
     /* 새로운 회원인 경우 정보 저장*/

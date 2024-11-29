@@ -8,6 +8,7 @@ import com.ecyce.karma.domain.product.entity.Product;
 import com.ecyce.karma.domain.product.repository.ProductRepository;
 import com.ecyce.karma.domain.review.entity.Review;
 import com.ecyce.karma.domain.review.repository.ReviewRepository;
+import com.ecyce.karma.domain.s3.S3Uploader;
 import com.ecyce.karma.domain.user.dto.request.ModifyAddressRequest;
 import com.ecyce.karma.domain.user.dto.request.ModifyInfoRequest;
 import com.ecyce.karma.domain.user.dto.request.UserInfoRequest;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +39,7 @@ public class UserService {
     private final OrdersRepository ordersRepository;
     private final ReviewRepository reviewRepository;
     private final AddressRepository addressRepository;
+    private final S3Uploader s3Uploader;
 
     /* 작가 정보 반환 */
     public ArtistInfoResponse getArtistInfo(Long userId) {
@@ -78,11 +81,12 @@ public class UserService {
 
 
     /* 새로운 사용자인 경우 정보 저장 */
-    public UserInfo saveNewUser(User user, UserInfoRequest dto)  {
+    public UserInfo saveNewUser(User user, UserInfoRequest dto , String url)  {
         // 주소 먼저 update
         Address updateAddress =  Address.toEntity(user , dto);
         addressRepository.save(updateAddress);
         user.updateNewUserInfo(user , dto);
+        user.updateProfileImage(url);
         userRepository.save(user);
         User updateUser = userRepository.findByUserId(user.getUserId());
         return UserInfo.from(updateUser , updateAddress);
@@ -111,5 +115,15 @@ public class UserService {
 
       UserInfo userInfo = UserInfo.of(user);
       return userInfo;  // 이것도 기존값 넣어줘여겠다
+    }
+
+    /* 사용자 이미지 수정 */
+    public void modifyProfileImage(User user, MultipartFile multipartFile) {
+      String deletedUrl = userRepository.findProfileImageUrl(user.getUserId());
+      s3Uploader.deleteFile(deletedUrl);
+
+      User targetUser = userRepository.findByUserId(user.getUserId());
+      String updateUrl = s3Uploader.saveFile(multipartFile);
+      targetUser.updateProfileImage(updateUrl);
     }
 }
