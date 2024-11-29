@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -15,13 +16,19 @@ public class ReviewDetailDto {
     private LocalDate reviewDate;
     private String content;
     private Integer rating;
+    private List<ReviewImageResponseDto> reviewImages;
 
     public static ReviewDetailDto from(Review review) {
+        List<ReviewImageResponseDto> images = review.getReviewImages().stream()
+                .map(image -> new ReviewImageResponseDto(image.getReviewImageId(), image.getImageUrl()))
+                .toList();
+
         return new ReviewDetailDto(
                 review.getUser().getNickname(),
                 review.getCreatedAt().toLocalDate(),
                 review.getContent(),
-                review.getRating()
+                review.getRating(),
+                images
         );
     }
 }

@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,10 +21,16 @@ public class ReviewResponseDto {
     private String productOption;
     private String content;
     private Integer rating;
+    private List<ReviewImageResponseDto> reviewImages;
 
     public static ReviewResponseDto from(Review review) {
         Product product = review.getOrders().getProduct();
         ProductOption productOption = review.getOrders().getProductOption();
+
+        List<ReviewImageResponseDto> images = review.getReviewImages().stream()
+                .distinct()
+                .map(image -> new ReviewImageResponseDto(image.getReviewImageId(), image.getImageUrl()))
+                .toList();
 
         return new ReviewResponseDto(
                 review.getReviewId(),
@@ -31,7 +39,8 @@ public class ReviewResponseDto {
                 product.getProductName(),
                 productOption.getOptionName(),
                 review.getContent(),
-                review.getRating()
+                review.getRating(),
+                images
         );
     }
 }

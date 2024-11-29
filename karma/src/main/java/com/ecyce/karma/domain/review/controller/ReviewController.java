@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/reviews")
@@ -19,8 +22,10 @@ public class ReviewController {
 
     /* 리뷰 생성 */
     @PostMapping
-    public ResponseEntity<ReviewResponseDto> createReview(@AuthUser User user, @RequestBody ReviewRequestDto requestDto) {
-        ReviewResponseDto responseDto = reviewService.create(user, requestDto);
+    public ResponseEntity<ReviewResponseDto> createReview(@AuthUser User user,
+                                                          @RequestPart("reviewRequestDto") ReviewRequestDto requestDto,
+                                                          @RequestPart(value = "reviewImages", required = false) List<MultipartFile> reviewImages) {
+        ReviewResponseDto responseDto = reviewService.create(user, requestDto, reviewImages);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 

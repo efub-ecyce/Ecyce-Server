@@ -9,6 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -34,6 +37,9 @@ public class Review extends BaseTimeEntity {
     @JoinColumn(name = "orderId", unique = true, updatable = false, nullable = false)
     private Orders orders;
 
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewImage> reviewImages = new ArrayList<>();
+
     @Builder
     public Review (String content , Integer rating , User user , Orders orders ){
         this.content = content;
@@ -51,4 +57,11 @@ public class Review extends BaseTimeEntity {
                 .build();
     }
 
+    public void addReviewImage(ReviewImage reviewImage) {
+        this.reviewImages.add(reviewImage);
+    }
+
+    public void addReviewImages(List<ReviewImage> reviewImages) {
+        reviewImages.forEach(this::addReviewImage);
+    }
 }

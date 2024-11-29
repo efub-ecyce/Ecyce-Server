@@ -9,13 +9,16 @@ import com.ecyce.karma.domain.review.dto.ReviewDetailDto;
 import com.ecyce.karma.domain.review.dto.ReviewRequestDto;
 import com.ecyce.karma.domain.review.dto.ReviewResponseDto;
 import com.ecyce.karma.domain.review.entity.Review;
+import com.ecyce.karma.domain.review.entity.ReviewImage;
 import com.ecyce.karma.domain.review.repository.ReviewRepository;
+import com.ecyce.karma.domain.s3.S3Uploader;
 import com.ecyce.karma.domain.user.entity.User;
 import com.ecyce.karma.global.exception.CustomException;
 import com.ecyce.karma.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,9 +30,10 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final OrdersRepository ordersRepository;
     private final ProductRepository productRepository;
+    private final S3Uploader s3Uploader;
 
     /* 리뷰 생성 */
-    public ReviewResponseDto create(User user, ReviewRequestDto requestDto) {
+    public ReviewResponseDto create(User user, ReviewRequestDto requestDto, List<MultipartFile> images) {
         Orders order = ordersRepository.findByOrderId(requestDto.getOrderId())
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -37,6 +41,15 @@ public class ReviewService {
         validateReviewPermissions(user, order);
 
         Review review = Review.createReview(requestDto.getContent(), requestDto.getRating(), user, order);
+
+        // 리뷰 이미지 업로드
+        if (images != null && !images.isEmpty()) {
+            List<String> imageUrls = s3Uploader.saveFiles(images);
+            List<ReviewImage> reviewImages = imageUrls.stream()
+                    .map(url -> ReviewImage.create(review, url))
+                    .toList();
+            review.addReviewImages(reviewImages);
+        }
         reviewRepository.save(review);
         return ReviewResponseDto.from(review);
     }
