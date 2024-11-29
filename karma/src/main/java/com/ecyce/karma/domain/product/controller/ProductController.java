@@ -12,11 +12,13 @@ import com.ecyce.karma.domain.product.dto.response.ProductSimpleResponse;
 import com.ecyce.karma.domain.product.service.ProductService;
 import com.ecyce.karma.domain.review.dto.ReviewDetailDto;
 import com.ecyce.karma.domain.review.service.ReviewService;
+import com.ecyce.karma.domain.s3.S3Uploader;
 import com.ecyce.karma.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,8 +35,10 @@ public class ProductController {
 
     /* 상품 등록  , 현재 사진 업로드하는 코드는 포함되어 있지 않음 */
     @PostMapping
-    public ResponseEntity<ProductDetailResponse> registerProduct(@AuthUser User user , @RequestBody ProductRequest dto){
-         ProductDetailResponse response = productService.registerProduct(user  , dto);
+    public ResponseEntity<ProductDetailResponse> registerProduct(@AuthUser User user ,
+                                                                 @RequestPart(value = "productImages") List<MultipartFile> fileList,
+                                                                 @RequestPart(value ="request") ProductRequest dto){
+         ProductDetailResponse response = productService.registerProduct(user  , fileList ,dto);
          return ResponseEntity.status(HttpStatus.CREATED)
                  .body(response);
     }

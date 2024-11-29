@@ -120,7 +120,9 @@ public class UserService {
     /* 사용자 이미지 수정 */
     public void modifyProfileImage(User user, MultipartFile multipartFile) {
       String deletedUrl = userRepository.findProfileImageUrl(user.getUserId());
-      s3Uploader.deleteFile(deletedUrl);
+        if (deletedUrl != null && !deletedUrl.isEmpty()) {
+            s3Uploader.deleteFile(deletedUrl);
+        }
 
       User targetUser = userRepository.findByUserId(user.getUserId());
       String updateUrl = s3Uploader.saveFile(multipartFile);

@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,7 +53,7 @@ public class ProductService {
     }
 
     /* 제품 등록 */
-    public ProductDetailResponse registerProduct(User user, ProductRequest dto) {
+    public ProductDetailResponse registerProduct(User user, List<MultipartFile> fileList, ProductRequest dto) {
         Product product = ProductRequest.toEntity(user , dto);
         productRepository.save(product);
         // 옵션이 있다면
