@@ -17,7 +17,7 @@ public class ReviewResponseDto {
     private String reviewerName;
     private Long productId;
     private String productName;
-//    private String productImage;
+    private String productThumbnail;
     private String productOption;
     private String content;
     private Integer rating;
@@ -26,6 +26,11 @@ public class ReviewResponseDto {
     public static ReviewResponseDto from(Review review) {
         Product product = review.getOrders().getProduct();
         ProductOption productOption = review.getOrders().getProductOption();
+        String productThumbnail = null;
+        if (product.getProductImages() != null && !product.getProductImages().isEmpty()) {
+            productThumbnail = product.getProductImages().get(0).getProductImgUrl();
+        }
+
 
         List<ReviewImageResponseDto> images = review.getReviewImages().stream()
                 .distinct()
@@ -37,6 +42,7 @@ public class ReviewResponseDto {
                 review.getUser().getNickname(),
                 product.getProductId(),
                 product.getProductName(),
+                productThumbnail,
                 productOption.getOptionName(),
                 review.getContent(),
                 review.getRating(),
