@@ -41,7 +41,7 @@ public class Product extends BaseTimeEntity {
     private int duration;
 
     @Column
-    private Integer rating;  // 점수는 아무도 리뷰를 쓰지 않은 경우 , 없을 수 있음
+    private double rating;  // 점수는 아무도 리뷰를 쓰지 않은 경우 , 없을 수 있음
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -70,7 +70,7 @@ public class Product extends BaseTimeEntity {
     private List<Bookmark> bookmarkList = new ArrayList<>();
 
     @Builder
-    public Product(User user , String productName , int price , String content , int duration , int rating , ProductState productState,
+    public Product(User user , String productName , int price , String content , int duration , double rating , ProductState productState,
     Integer deliveryFee , String materialInfo, String buyerNotice){
         this.user = user;
         this.productName = productName;
@@ -113,5 +113,8 @@ public class Product extends BaseTimeEntity {
         if(dto.getBuyerNotice()!= null && dto.getBuyerNotice().isPresent()){
             this.buyerNotice = dto.getBuyerNotice().get();
         }
+    }
+    public void updateRating(double rating){
+        this.rating = rating;
     }
 }

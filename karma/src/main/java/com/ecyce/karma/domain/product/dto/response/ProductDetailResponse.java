@@ -15,7 +15,7 @@ public record ProductDetailResponse(
         int price, // 가격
         String content, // 제품 소개
         int duration, // 소요 기간
-        Integer rating, // 평점
+        double rating, // 평점
         ProductState productState, // 제품 공개 여부
         Integer deliveryFee, // 배송비
         String materialInfo, // 소재의 정보

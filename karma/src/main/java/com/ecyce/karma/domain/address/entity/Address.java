@@ -43,7 +43,7 @@ public class Address{
     /* 주소 형식 포맷팅 */
     @Override
     public String toString() {
-        return String.format("[%d] %s %s", postalCode, address1, address2);
+        return String.format("[%s] %s %s", postalCode, address1, address2);
     }
 
     /* 초기 사용자인 경우 , 모든 주소를 update*/
