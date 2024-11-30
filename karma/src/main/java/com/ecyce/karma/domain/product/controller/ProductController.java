@@ -8,11 +8,11 @@ import com.ecyce.karma.domain.product.dto.request.OptionRequest;
 import com.ecyce.karma.domain.product.dto.response.OptionResponse;
 import com.ecyce.karma.domain.product.dto.response.ProductDetailResponse;
 import com.ecyce.karma.domain.product.dto.request.ProductRequest;
+import com.ecyce.karma.domain.product.dto.response.ProductImgsResponse;
 import com.ecyce.karma.domain.product.dto.response.ProductSimpleResponse;
 import com.ecyce.karma.domain.product.service.ProductService;
 import com.ecyce.karma.domain.review.dto.ReviewDetailDto;
 import com.ecyce.karma.domain.review.service.ReviewService;
-import com.ecyce.karma.domain.s3.S3Uploader;
 import com.ecyce.karma.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,7 +36,7 @@ public class ProductController {
     /* 상품 등록  , 현재 사진 업로드하는 코드는 포함되어 있지 않음 */
     @PostMapping
     public ResponseEntity<ProductDetailResponse> registerProduct(@AuthUser User user ,
-                                                                 @RequestPart(value = "productImages") List<MultipartFile> fileList,
+                                                                 @RequestPart(value = "productImages" , required = false) List<MultipartFile> fileList,
                                                                  @RequestPart(value ="request") ProductRequest dto){
          ProductDetailResponse response = productService.registerProduct(user  , fileList ,dto);
          return ResponseEntity.status(HttpStatus.CREATED)
@@ -132,6 +132,33 @@ public class ProductController {
     public ResponseEntity<OptionResponse> addOption(@AuthUser User user , @PathVariable("productId") Long productId , @RequestBody OptionRequest request){
         return productService.addOption(user , productId , request);
     }
+
+    /* 소재 사진 (material example) 수정 */
+    @PatchMapping("/{productId}/mat")
+    public ResponseEntity<ProductDetailResponse> modifyMaterialEX(@AuthUser User user , @PathVariable("productId") Long productId ,
+                                                                  @RequestPart(value = "materialEx") MultipartFile file){
+        return productService.modifyMaterialEX(user , productId , file);
+    }
+
+    /* 소재 사진 삭제 */
+    @DeleteMapping("/{productId}/mat")
+    public ResponseEntity<String> deleteMatrialEX(@AuthUser User user , @PathVariable("productId") Long productId ){
+        return productService.deleteMaterialEx(user , productId);
+    }
+
+    /*상품 사진 추가*/
+    @PostMapping("/{productId}/image")
+    public ResponseEntity<ProductImgsResponse> addProductImage(@AuthUser User user , @PathVariable("productId") Long productId,
+                                                               @RequestPart(value = "productImg") MultipartFile file){
+        return productService.addProductImg(user , productId , file);
+    }
+
+    /* 상품 이미지 삭제 */
+    @DeleteMapping("/{productId}/image/{imgId}")
+    public ResponseEntity<String> deleteProductImg(@AuthUser User user ,  @PathVariable("productId") Long productId  ,@PathVariable("imgId") Long imgId){
+        return productService.deleteProductImg(user , productId , imgId);
+    }
+
 
 
 }

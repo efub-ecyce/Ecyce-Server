@@ -19,9 +19,11 @@ public record ProductDetailResponse(
         ProductState productState, // 제품 공개 여부
         Integer deliveryFee, // 배송비
         String materialInfo, // 소재의 정보
+        String materialExample,
         String buyerNotice, // 구매자 안내사항
 
-        List<OptionResponse> options
+        List<OptionResponse> options,
+        List<ProductImgsResponse> imgs
 
 ) {
     public static ProductDetailResponse from(Product product , boolean isMarked){
@@ -38,9 +40,13 @@ public record ProductDetailResponse(
                 product.getProductState(),
                 product.getDeliveryFee(),
                 product.getMaterialInfo(),
+                product.getMaterialExample(),
                 product.getBuyerNotice(),
                 product.getOptions().stream()
                         .map(OptionResponse:: from )
+                        .collect(Collectors.toList()),
+                product.getProductImages().stream()
+                        .map(ProductImgsResponse::from)
                         .collect(Collectors.toList())
         );
     }
@@ -60,8 +66,12 @@ public record ProductDetailResponse(
                 product.getProductState(),
                 product.getDeliveryFee(),
                 product.getMaterialInfo(),
+                product.getMaterialExample(),
                 product.getBuyerNotice(),
-                options
+                options,
+                product.getProductImages().stream()
+                        .map(ProductImgsResponse::from)
+                        .collect(Collectors.toList())
         );
     }
 

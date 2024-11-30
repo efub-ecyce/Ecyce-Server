@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -54,19 +55,22 @@ public class ChatRoomService {
     /* 전체 채팅방 목록: 사용자가 buyer 또는 seller로 참여한 채팅방 */
     public List<ChatRoomListDto> findAllChatRooms(User user) {
         List<ChatRoom> chatRooms = chatRoomRepository.findByBuyerOrSeller(user, user);
-        return mapToChatRoomListDto(chatRooms, user);
+        List<ChatRoomListDto> chatRoomListDtos = mapToChatRoomListDto(chatRooms, user);
+        return sortChatRoomsByLatestMessage(chatRoomListDtos);
     }
 
     /* 판매 채팅방 목록: 사용자가 seller로 참여한 채팅방 */
     public List<ChatRoomListDto> findSellingChatRooms(User user) {
-        List<ChatRoom> chatRooms = chatRoomRepository.findBySeller(user); // 판매자 기준
-        return mapToChatRoomListDto(chatRooms, user);
+        List<ChatRoom> chatRooms = chatRoomRepository.findBySeller(user);
+        List<ChatRoomListDto> chatRoomListDtos = mapToChatRoomListDto(chatRooms, user);
+        return sortChatRoomsByLatestMessage(chatRoomListDtos);
     }
 
     /* 구매 채팅방 목록: 사용자가 buyer로 참여한 채팅방 */
     public List<ChatRoomListDto> findBuyingChatRooms(User user) {
-        List<ChatRoom> chatRooms = chatRoomRepository.findByBuyer(user); // 구매자 기준
-        return mapToChatRoomListDto(chatRooms, user);
+        List<ChatRoom> chatRooms = chatRoomRepository.findByBuyer(user);
+        List<ChatRoomListDto> chatRoomListDtos = mapToChatRoomListDto(chatRooms, user);
+        return sortChatRoomsByLatestMessage(chatRoomListDtos);
     }
 
     /* 특정 채팅방의 상세 정보 조회 */
@@ -95,6 +99,17 @@ public class ChatRoomService {
                 .map(chatRoom -> {
                     ChatMessage latestMessage = chatMessageRepository.findTopByRoomIdOrderByTimestampDesc(chatRoom.getRoomId());
                     return ChatRoomListDto.from(chatRoom, latestMessage, currentUser);
+                })
+                .collect(Collectors.toList());
+    }
+
+    /* 최신 메시지 기준으로 채팅방 정렬 */
+    private List<ChatRoomListDto> sortChatRoomsByLatestMessage(List<ChatRoomListDto> chatRoomListDtos) {
+        return chatRoomListDtos.stream()
+                .sorted((dto1, dto2) -> {
+                    LocalDateTime time1 = (dto1.getLatestMessageTimestamp() != null) ? dto1.getLatestMessageTimestamp() : LocalDateTime.MIN;
+                    LocalDateTime time2 = (dto2.getLatestMessageTimestamp() != null) ? dto2.getLatestMessageTimestamp() : LocalDateTime.MIN;
+                    return time2.compareTo(time1);
                 })
                 .collect(Collectors.toList());
     }

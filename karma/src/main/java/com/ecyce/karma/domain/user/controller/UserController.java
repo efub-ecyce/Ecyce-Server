@@ -73,7 +73,7 @@ public class UserController {
     @PostMapping("/user")
     public ResponseEntity<UserInfo> saveNewUserInfo(@AuthUser User user ,
                                                     @RequestPart(value= "profileImage" , required = false) MultipartFile multipartFile,
-                                                    @RequestPart(value = "request") UserInfoRequest request){
+                                                    @RequestPart(value = "request" , required = false) UserInfoRequest request){
         String url = s3Uploader.saveFile(multipartFile);
         UserInfo userInfo = userService.saveNewUser(user,request , url);
         return ResponseEntity.status(HttpStatus.OK)
@@ -84,7 +84,7 @@ public class UserController {
     @PatchMapping("/user")
     public ResponseEntity<AllUserInfo> modifyUserInfo(@AuthUser User user ,
                                                       @RequestPart(value= "profileImage" , required = false) MultipartFile multipartFile,
-                                                      @RequestPart(value = "request") ModifyInfoRequest request){
+                                                      @RequestPart(value = "request" , required = false) ModifyInfoRequest request){
 
         if(multipartFile != null){
             userService.modifyProfileImage(user  , multipartFile);

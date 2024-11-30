@@ -53,8 +53,8 @@ public class Product extends BaseTimeEntity {
     @Column
     private String materialInfo; // 소재의 정보
 
-//    @Column
-//    private String materialExample; // 소재의 정보
+    @Column
+    private String materialExample; // 소재의 정보
 
     @Column
     private String buyerNotice; // 구매자 안내사항
@@ -69,9 +69,13 @@ public class Product extends BaseTimeEntity {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bookmark> bookmarkList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "product" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImage> productImages  = new ArrayList<>();
+
+
     @Builder
     public Product(User user , String productName , int price , String content , int duration , double rating , ProductState productState,
-    Integer deliveryFee , String materialInfo, String buyerNotice){
+    Integer deliveryFee , String materialInfo, String materialExample ,String buyerNotice){
         this.user = user;
         this.productName = productName;
         this.price = price;
@@ -81,6 +85,7 @@ public class Product extends BaseTimeEntity {
         this.productState = productState;
         this.deliveryFee = deliveryFee;
         this.materialInfo = materialInfo;
+        this.materialExample = materialExample;
         this.buyerNotice = buyerNotice;
     }
 
@@ -113,6 +118,11 @@ public class Product extends BaseTimeEntity {
         if(dto.getBuyerNotice()!= null && dto.getBuyerNotice().isPresent()){
             this.buyerNotice = dto.getBuyerNotice().get();
         }
+    }
+
+    /* 상품 소재 정보 저장 */
+    public void updateMaterialExample(String url){
+        this.materialExample = url;
     }
     public void updateRating(double rating){
         this.rating = rating;

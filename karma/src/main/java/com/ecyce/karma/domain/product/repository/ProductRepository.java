@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product , Long> {
@@ -37,5 +38,9 @@ public interface ProductRepository extends JpaRepository<Product , Long> {
     /* 최신순으로 정렬 */
     @Query("SELECT p FROM Product p ORDER BY p.createdAt DESC")
     List<Product> findAllOrderByCreatedAtDesc();
+
+    /* 소재 예시 사진 url 찾기 */
+    @Query("SELECT p.materialExample from Product p where p.productId =:productId")
+    String findMaterialEx(@Param("productId") Long productId);
 
 }
