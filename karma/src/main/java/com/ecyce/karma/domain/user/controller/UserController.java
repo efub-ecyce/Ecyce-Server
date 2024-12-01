@@ -34,6 +34,7 @@ public class UserController {
     private final UserService userService;
     private final ProductService productService;
     private final S3Uploader s3Uploader;
+    private final ReviewService reviewService;
 
     /* 회원별 북마크 상품 목록 조회 */
     @GetMapping("/users/bookmarks")
@@ -102,6 +103,12 @@ public class UserController {
     }
 
 
+    /* 작가의 리뷰 리스트 반환 */
+    @GetMapping("/artist/{userId}/review")
+    public ResponseEntity<List<ReviewResponseDto>> getArtistReview(@AuthUser User user){
+        List<ReviewResponseDto> reviewList = reviewService.getReviewListByArtist(user);
+        return ResponseEntity.status(HttpStatus.OK).body(reviewList);
+    }
 
 
 }
