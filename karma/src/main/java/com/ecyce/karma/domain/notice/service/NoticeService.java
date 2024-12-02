@@ -36,7 +36,7 @@ public class NoticeService {
                 .collect(Collectors.toList());
 
         List<NoticeResponseDto> acceptBuyerNotices = findAllAsBuyer.stream()
-                .filter(order -> OrderState.접수완료.equals(order.getOrderState()))
+                .filter(order -> OrderState.제작대기.equals(order.getOrderState()))
                 .map( order -> NoticeResponseDto.acceptOrders(order , user))
                 .collect(Collectors.toList());
 
