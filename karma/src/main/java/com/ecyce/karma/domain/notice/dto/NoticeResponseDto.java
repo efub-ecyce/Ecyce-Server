@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public record NoticeResponseDto(
         Long userId,
         Long orderId ,
+        String productName,
         OrderState orderState,
         String noticeContent,
         LocalDateTime updatedAt
@@ -21,8 +22,9 @@ public record NoticeResponseDto(
         return new NoticeResponseDto(
                 user.getUserId(),
                 orders.getOrderId(),
+                orders.getProduct().getProductName(),
                 orders.getOrderState(),
-                "주문이 들어왔습니다. 확인해주세요.",
+                "주문이 들어왔습니다.",
                 orders.getUpdatedAt()
         );
 
@@ -33,6 +35,7 @@ public record NoticeResponseDto(
         return new NoticeResponseDto(
                 user.getUserId(),
                 orders.getOrderId(),
+                orders.getProduct().getProductName(),
                 orders.getOrderState(),
                 "주문하신 제품의 배송이 시작되었습니다.",
                 orders.getUpdatedAt()
@@ -44,6 +47,7 @@ public record NoticeResponseDto(
         return new NoticeResponseDto(
                 user.getUserId(),
                 orders.getOrderId(),
+                orders.getProduct().getProductName(),
                 orders.getOrderState(),
                 "판매자가 주문을 거절했습니다.",
                 orders.getUpdatedAt()
@@ -55,6 +59,7 @@ public record NoticeResponseDto(
         return new NoticeResponseDto(
                 user.getUserId(),
                 orders.getOrderId(),
+                orders.getProduct().getProductName(),
                 orders.getOrderState(),
                 "판매자가 주문을 수락했습니다.",
                 orders.getUpdatedAt()
