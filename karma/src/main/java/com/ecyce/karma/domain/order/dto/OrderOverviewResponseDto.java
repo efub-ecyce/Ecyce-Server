@@ -19,21 +19,17 @@ public class OrderOverviewResponseDto {
     private String orderState; // 주문 상태
     private LocalDateTime createdAt; // 주문 생성일
     private int totalPrice; // 총 금액
-//    private ProductImageDto productImages; // 상품 이미지 정보
-
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ProductImageDto {
-        private Long productImageId; // 상품 이미지 ID
-        private String productImageUrl; // 상품 이미지 URL
-    }
+    private String productThumbnail; // 상품 대표 이미지
 
     /**
      * 정적 메서드: 엔티티를 DTO로 변환
      */
     public static OrderOverviewResponseDto fromEntity(Orders order) {
+        // 상품 이미지 가져오기
+        String productThumbnail = null;
+        if (order.getProduct().getProductImages() != null && !order.getProduct().getProductImages().isEmpty()) {
+            productThumbnail = order.getProduct().getProductImages().get(0).getProductImgUrl();
+        }
         return OrderOverviewResponseDto.builder()
                                        .orderId(order.getOrderId())
                                        .productName(order.getProduct().getProductName())
@@ -42,10 +38,7 @@ public class OrderOverviewResponseDto {
                                        .orderState(order.getOrderState().name())
                                        .createdAt(order.getCreatedAt())
                                        .totalPrice(order.getPay().getPayAmount())
-//                               .productImages(ProductImageDto.builder()
-//                                                             .productImageId(order.getProduct().)
-//                                                             .productImageUrl(order.getProductImageUrl())
-//                                                             .build())
+                                       .productThumbnail(productThumbnail)
                                        .build();
     }
 }

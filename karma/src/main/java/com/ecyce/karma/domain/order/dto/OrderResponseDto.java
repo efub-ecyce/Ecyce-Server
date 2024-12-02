@@ -13,6 +13,7 @@ public class OrderResponseDto {
     /**주문 상세 정보 조회*/
     // 주문 정보
     private Long orderId;
+    private String productThumbnail;
     private String productName;
     private String productOption;
     private Integer orderCount;
@@ -48,9 +49,15 @@ public class OrderResponseDto {
     private Integer totalPrice;
 
     public static OrderResponseDto from(Orders order) {
+        // 상품 이미지 가져오기
+        String productThumbnail = null;
+        if (order.getProduct().getProductImages() != null && !order.getProduct().getProductImages().isEmpty()) {
+            productThumbnail = order.getProduct().getProductImages().get(0).getProductImgUrl();
+        }
         return new OrderResponseDto(
                 // 주문 정보
                 order.getOrderId(),
+                productThumbnail,
                 order.getProduct().getProductName(),
                 order.getProductOption().getOptionName(),
                 order.getOrderCount(),
