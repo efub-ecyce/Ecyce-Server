@@ -42,7 +42,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(Arrays.asList(
-                "https://jiangxy.github.io", "http://localhost:3000", "https://api.ecyce-karma.n-e.kr"));
+                "https://jiangxy.github.io", "http://localhost:3000", "https://api.ecyce-karma.n-e.kr", "https://ecyce.netlify.app"));
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
