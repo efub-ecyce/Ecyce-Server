@@ -2,7 +2,6 @@ package com.ecyce.karma.domain.user.entity;
 
 import com.ecyce.karma.domain.address.entity.Address;
 import com.ecyce.karma.domain.bookmark.entity.Bookmark;
-import com.ecyce.karma.domain.notice.entity.Notice;
 import com.ecyce.karma.domain.order.entity.Orders;
 import com.ecyce.karma.domain.product.entity.Product;
 import com.ecyce.karma.domain.user.dto.request.ModifyInfoRequest;
@@ -47,8 +46,8 @@ public class User {
     @Column
     private String kakaoAccessToken;
 
-    @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Notice> noticeList = new ArrayList<>();
+//    @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
+//    List<Notice> noticeList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
     List<Bookmark> bookmarks = new ArrayList<>();
