@@ -12,6 +12,7 @@ import com.ecyce.karma.domain.product.dto.response.ProductSimpleResponse;
 import com.ecyce.karma.domain.product.entity.Product;
 import com.ecyce.karma.domain.product.entity.ProductImage;
 import com.ecyce.karma.domain.product.entity.ProductOption;
+import com.ecyce.karma.domain.product.entity.ProductState;
 import com.ecyce.karma.domain.product.repository.ProductImageRepository;
 import com.ecyce.karma.domain.product.repository.ProductOptionRepository;
 import com.ecyce.karma.domain.product.repository.ProductRepository;
@@ -100,7 +101,10 @@ public class ProductService {
     /* 특정 작가의 작품 리스트 반환 */
     public List<ProductSimpleResponse> getProductListOfArtist(Long artistId ,User user) {
         List<Product> productList = productRepository.findByUserId(artistId);
-        return getProductSimpleResponses(user, productList);
+        List<Product> filteredProductList = productList.stream()
+                .filter(product -> product.getProductState() == ProductState.ON_SALE)
+                .collect(Collectors.toList());
+        return getProductSimpleResponses(user, filteredProductList);
     }
 
     /* 요청을 한 사용자의 북마크 여부를 표시하기 위한 메서드 */
@@ -194,19 +198,28 @@ public class ProductService {
 
         if(category.equals(1L)){ // 후기순
             List<Product> sortedProducts = productRepository.findAllOrderByRatingDesc(); // 정렬된 결과 가져오기
+            List<Product> filteredProductList = sortedProducts.stream()
+                    .filter(product -> product.getProductState() == ProductState.ON_SALE)
+                    .collect(Collectors.toList());
             // 로그인 여부에 따른 북마크 상태 포함
-            List<ProductSimpleResponse> productSimpleResponses = getProductSimpleResponses(user, sortedProducts);
+            List<ProductSimpleResponse> productSimpleResponses = getProductSimpleResponses(user, filteredProductList);
             return ResponseEntity.ok(productSimpleResponses);
         }
         else if(category.equals(2L)){ // 북마크 개수 순
             List<Product> sortedProducts = productRepository.findAllOrderByBookmarkCountDesc();
+            List<Product> filteredProductList = sortedProducts.stream()
+                    .filter(product -> product.getProductState() == ProductState.ON_SALE)
+                    .collect(Collectors.toList());
             // 로그인 여부에 따른 북마크 상태 포함
-            List<ProductSimpleResponse> productSimpleResponses = getProductSimpleResponses(user, sortedProducts);
+            List<ProductSimpleResponse> productSimpleResponses = getProductSimpleResponses(user, filteredProductList);
             return ResponseEntity.ok(productSimpleResponses);
         }
         else if(category.equals(3L)){ // 최근순
            List<Product> sortedProducts = productRepository.findAllOrderByCreatedAtDesc();
-           List<ProductSimpleResponse> productSimpleResponse = getProductSimpleResponses(user , sortedProducts);
+            List<Product> filteredProductList = sortedProducts.stream()
+                    .filter(product -> product.getProductState() == ProductState.ON_SALE)
+                    .collect(Collectors.toList());
+           List<ProductSimpleResponse> productSimpleResponse = getProductSimpleResponses(user , filteredProductList);
            return ResponseEntity.ok(productSimpleResponse);
         }
         else throw  new CustomException(ErrorCode.INVALID_REQUEST);
