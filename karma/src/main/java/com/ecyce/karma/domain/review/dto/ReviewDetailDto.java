@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ReviewDetailDto {
     private String reviewerName;
+    private String userImage;
     private LocalDate reviewDate;
     private String content;
     private Integer rating;
@@ -25,6 +26,7 @@ public class ReviewDetailDto {
 
         return new ReviewDetailDto(
                 review.getUser().getNickname(),
+                review.getUser().getProfileImage(),
                 review.getCreatedAt().toLocalDate(),
                 review.getContent(),
                 review.getRating(),

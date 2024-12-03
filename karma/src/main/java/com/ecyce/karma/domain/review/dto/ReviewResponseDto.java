@@ -15,6 +15,7 @@ import java.util.List;
 public class ReviewResponseDto {
     private Long reviewId;
     private String reviewerName;
+    private String userImage;
     private Long productId;
     private String productName;
     private String productThumbnail;
@@ -40,6 +41,7 @@ public class ReviewResponseDto {
         return new ReviewResponseDto(
                 review.getReviewId(),
                 review.getUser().getNickname(),
+                review.getUser().getProfileImage(),
                 product.getProductId(),
                 product.getProductName(),
                 productThumbnail,
