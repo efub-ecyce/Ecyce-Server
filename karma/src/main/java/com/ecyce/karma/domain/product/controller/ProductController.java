@@ -15,6 +15,7 @@ import com.ecyce.karma.domain.review.dto.ReviewDetailDto;
 import com.ecyce.karma.domain.review.service.ReviewService;
 import com.ecyce.karma.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/product")
 @RequiredArgsConstructor
+@Slf4j
 public class ProductController {
 
     private final ProductService productService;
@@ -45,8 +47,7 @@ public class ProductController {
 
    /* 단일 상품 조회 (상세)*/
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductDetailResponse> getProductDetail(Optional<User> userOpt , @PathVariable("productId") Long productId){
-        User user = userOpt.orElse(null); // user가 없으면 null로 설정
+    public ResponseEntity<ProductDetailResponse> getProductDetail(@AuthUser User user , @PathVariable("productId") Long productId){
         ProductDetailResponse dto = productService.getProductDetail(user ,productId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(dto);
@@ -54,10 +55,8 @@ public class ProductController {
 
     /* 상품 리스트 조회*/
     @GetMapping
-    public ResponseEntity<List<ProductSimpleResponse>> getProductList(Optional<User> userOpt){
-        User user = userOpt.orElse(null); // user가 없으면 null로 설정
+    public ResponseEntity<List<ProductSimpleResponse>> getProductList(@AuthUser User user){
         List<ProductSimpleResponse> dtos = productService.getProductList(user);
-
         return ResponseEntity.status(HttpStatus.OK)
                 .body(dtos);
     }

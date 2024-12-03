@@ -49,10 +49,6 @@ public class ProductService {
 
         Product product = findProduct(productId);
 
-        if (user == null){
-            return ProductDetailResponse.from(product , false);
-        }
-
         Boolean isMarked = bookmarkRepository.isBookmarked(productId , user.getUserId());
 
 
