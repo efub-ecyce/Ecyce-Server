@@ -10,6 +10,8 @@ public record ProductDetailResponse(
         Long productId, // 상품 Id
         Long userId, // 판매자 Id
         String sellerNickname,
+
+        String sellerProfileImg,
         String productName, // 상품 이름
         boolean isMarked,
         int price, // 가격
@@ -31,6 +33,7 @@ public record ProductDetailResponse(
                 product.getProductId(),
                 product.getUser().getUserId(),
                 product.getUser().getNickname(),
+                product.getUser().getProfileImage(),
                 product.getProductName(),
                 isMarked,
                 product.getPrice(),
@@ -57,6 +60,7 @@ public record ProductDetailResponse(
                 product.getProductId(),
                 product.getUser().getUserId(),
                 product.getUser().getNickname(),
+                product.getUser().getProfileImage(),
                 product.getProductName(),
                 false,
                 product.getPrice(),
