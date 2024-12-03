@@ -95,7 +95,10 @@ public class ProductService {
     /*상품 리스트 조회 */
     public List<ProductSimpleResponse> getProductList(User user) {
         List<Product> productList = productRepository.findAll();
-        return getProductSimpleResponses(user, productList);
+        List<Product> filteredProductList = productList.stream()
+                .filter(product -> product.getProductState() == ProductState.ON_SALE)
+                .collect(Collectors.toList());
+        return getProductSimpleResponses(user, filteredProductList);
     }
 
     /* 특정 작가의 작품 리스트 반환 */
