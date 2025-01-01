@@ -32,4 +32,18 @@ public class OAuthController {
         return ResponseEntity.ok(jwtService.reissueAccessToken(request));
     }
 
+    /* 로그아웃 */
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String token = jwtService.getTokenFromRequest(request);
+
+        if (token != null) {
+            Long userId = jwtService.extractUserId(token);
+            jwtService.logout(userId);
+            return ResponseEntity.ok("로그아웃 되었습니다.");
+        } else {
+            return ResponseEntity.badRequest().body("로그아웃 실패: 토큰이 없습니다.");
+        }
+    }
+
 }
