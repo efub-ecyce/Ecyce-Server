@@ -86,14 +86,12 @@ jobs:
             sudo docker run -d -p 8080:8080 ${{ secrets.DOCKER_REPO }}:latest
             sudo docker image prune -f
             
-      - name: Deploy with Docker Compose
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          script: |
-            cd karma
-            sudo docker-compose down
-            sudo docker-compose pull
-            sudo docker-compose up --build -d
+     - name: Deploy with Docker Compose
+       uses: appleboy/ssh-action@master
+       with:
+         host: ${{ secrets.HOST }}
+         username: ${{ secrets.USERNAME }}
+         key: ${{ secrets.KEY }}
+         script: |
+           docker pull ${{ secrets.DOCKER_REPO }}:latest
+           docker-compose -f /app/docker-compose.yml up --build -d
