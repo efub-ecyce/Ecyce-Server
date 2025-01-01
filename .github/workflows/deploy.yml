@@ -85,16 +85,6 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_REPO }}:latest
             sudo docker run -d -p 8080:8080 ${{ secrets.DOCKER_REPO }}:latest
             sudo docker image prune -f
-      - name: Docker-compose.yml on EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          script: |
-            mkdir -p /home/ubuntu/karma
-            echo "${{ secrets.DOCKER_COMPOSE }}" > /home/ubuntu/karma/docker-compose.yml
-
       - name: Deploy with Docker Compose
         uses: appleboy/ssh-action@master
         with:
