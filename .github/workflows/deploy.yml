@@ -93,4 +93,4 @@ jobs:
           key: ${{ secrets.KEY }}
           script: |
             docker pull ${{ secrets.DOCKER_REPO }}:latest
-            docker-compose -f /app/docker-compose.yml up --build -d
+            docker-compose -f /karma/docker-compose.yml up --build -d
