@@ -42,10 +42,6 @@ public class User {
     @Column(length = 200)
     private String bio;
 
-
-    @Column
-    private String kakaoAccessToken;
-
 //    @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL, orphanRemoval = true)
 //    List<Notice> noticeList = new ArrayList<>();
 
@@ -65,20 +61,15 @@ public class User {
     Address address;
 
     @Builder
-    public  User(String nickname , String email , String profileImage , String phoneNumber , String bio ,String kakaoAccessToken, Address address){
+    public  User(String nickname , String email , String profileImage , String phoneNumber , String bio , Address address){
         this.nickname = nickname;
         this.email  = email;
         this.profileImage = profileImage;
         this.phoneNumber = phoneNumber;
         this.bio = bio;
-        this.kakaoAccessToken = kakaoAccessToken;
         this.address = address;
     }
 
-    /* 액세스 토큰 업데이트 */
-    public void updateKakaoAccessToken(String kakaoAccessToken) {
-        this.kakaoAccessToken = kakaoAccessToken;
-    }
 
     /* 이미지 url 업데이트 */
     public void updateProfileImage(String url){

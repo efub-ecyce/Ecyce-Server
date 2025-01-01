@@ -26,7 +26,7 @@ public class OAuthLoginService {
         // 받아온 정보 중 이메일로 유저 찾기 (없으면 생성 - 유저 등록)
         Long userId = findOrCreateUser(kakaoInfoResponseDto);
         // 액세스 토큰 저장
-        saveKakaoAccessToken(userId, kakaoAccessToken);
+//        saveKakaoAccessToken(userId, kakaoAccessToken);
 
         // 해당 유저의 jwt 인증 토큰 생성해 반환
         return jwtService.generateJwtToken(userId);
@@ -60,13 +60,6 @@ public class OAuthLoginService {
         } while (userRepository.findByNickname(nickname).isPresent());
         return nickname;
     }
-
-
-    // 카카오 액세스 토큰 저장 //
-    private void saveKakaoAccessToken(Long userId, String kakaoAccessToken){
-        User user = userRepository.findByUserId(userId);
-        user.updateKakaoAccessToken(kakaoAccessToken);
-        userRepository.save(user);
-    }
+    
 
 }

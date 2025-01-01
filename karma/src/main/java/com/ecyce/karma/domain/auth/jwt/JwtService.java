@@ -9,10 +9,12 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.io.Decoders;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -22,13 +24,12 @@ public class JwtService {
     private static final long ACCESS_TOKEN_EXPIRE_TIME =1000*60*60; //30분
     private static final long REFRESH_TOKEN_EXPIRE_IN = 1000 * 60 * 60*24 * 14; // 14일
 
-
     private final Key key;
 
-    private final JwtRefreshTokenRepository jwtRefreshTokenRepository;
+    private final StringRedisTemplate redisTemplate;
 
-    public JwtService(@Value("${spring.jwt.secret-key}") String secretKey , JwtRefreshTokenRepository jwtRefreshTokenRepository){
-        this.jwtRefreshTokenRepository = jwtRefreshTokenRepository;
+    public JwtService(@Value("${spring.jwt.secret-key}") String secretKey , StringRedisTemplate redisTemplate){
+        this.redisTemplate = redisTemplate;
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
@@ -43,20 +44,16 @@ public class JwtService {
         String refreshToken = generateToken(subject , refreshTokenExpiredAt);
 
         /* 리프레시 토큰 저장 (DB)*/
-        JwtRefreshToken jwtRefreshToken = JwtRefreshToken.builder()
-                .refreshToken(refreshToken)
-                .userId(userId)
-                .expiresIn(REFRESH_TOKEN_EXPIRE_IN)
-                .build();
-        if(jwtRefreshTokenRepository.findByUserId(userId) == null){ // 신규 회원일 경우
-            jwtRefreshTokenRepository.save(jwtRefreshToken);
-            return JwtTokens.of(accessToken ,refreshToken ,BEARER_TYPE , ACCESS_TOKEN_EXPIRE_TIME , true);
-        }
-        else{ // 기존 회원인 경우
-            updateRefreshToken(userId , refreshToken);
-            return JwtTokens.of(accessToken ,refreshToken, BEARER_TYPE , ACCESS_TOKEN_EXPIRE_TIME , false);
+          String key = "refreshToken:" + userId;
+          redisTemplate.opsForValue().set(
+                  key ,
+                  refreshToken,
+                  REFRESH_TOKEN_EXPIRE_IN,
+                  TimeUnit.MILLISECONDS
+          );
 
-        }
+          return JwtTokens.of(accessToken , refreshToken , BEARER_TYPE , ACCESS_TOKEN_EXPIRE_TIME , true);
+
     }
 
     /* 토큰 생성 */
@@ -131,13 +128,14 @@ public class JwtService {
         String Token = getTokenFromRequest(request);
         Long userId = extractUserId(Token);
         // accessToken으로 찾은 유저 아이디로 refreshToken 찾아 가져오기
-        JwtRefreshToken jwtRefreshToken = jwtRefreshTokenRepository.findByUserId(userId);
-        String refreshToken = jwtRefreshToken.getRefreshToken();
+        String key = "refreshToken:" + userId;
+        String refreshToken = redisTemplate.opsForValue().get(key);
+
         if (refreshToken == null) {
             throw new CustomException(ErrorCode.FAIL_AUTHENTICATION);
         }
         // refreshToken 유효성 검사
-        if(!validateRefreshToken(jwtRefreshToken)){
+        if(!validateRefreshToken(userId)){
             log.debug("유효하지 않은 refreshToken 입니다.");
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
@@ -146,27 +144,37 @@ public class JwtService {
     }
 
     /* 리프레시 토큰 검증 */
-    public boolean validateRefreshToken(JwtRefreshToken jwtRefreshToken) {
+    public boolean validateRefreshToken(Long userId) {
+        String key = "refreshToken:" + userId;
 
         try {
-            return new Date(jwtRefreshToken.getExpiresIn()).before(new Date());
-        } catch (ExpiredJwtException e) {
-            log.info(String.valueOf(ErrorCode.TOKEN_EXPIRED)); // 토큰 만료
-        } catch (JwtException e) {
-            log.info(String.valueOf(ErrorCode.INVALID_TOKEN)); // 유효하지 않는 토큰
-        } catch (Exception e) {
-            log.info(String.valueOf(ErrorCode.FAIL_AUTHENTICATION)); // 토큰 검증 실패
+           String refreshToken = redisTemplate.opsForValue().get(key);
+
+           if(refreshToken !=null){ // token이 존재하면
+               return true;
+           } else{ //redis에 없으면 유효기간 만료
+               log.info(String.valueOf(ErrorCode.TOKEN_EXPIRED));
+               return false;
+           }
+        }catch (Exception e){ // 토큰 검증 실패
+            log.info(String.valueOf(ErrorCode.FAIL_AUTHENTICATION));
+            return false;
         }
-        return false;
     }
 
-    /* 리프레시 토큰 업데이트 */
-    public void updateRefreshToken(Long userId, String refreshToken){
-        JwtRefreshToken jwtRefreshToken = jwtRefreshTokenRepository.findByUserId(userId);
-        jwtRefreshToken.updateJwtRefreshToken(refreshToken);
-        jwtRefreshTokenRepository.save(jwtRefreshToken);
-    }
+    /* 로그아웃 */
+    public void logout(Long userId) {
+        String key = "refreshToken:" + userId;
 
+        // Redis에서 해당 refresh token 삭제
+        Boolean result = redisTemplate.delete(key);
+
+        if (Boolean.TRUE.equals(result)) {
+            log.info("로그아웃 성공");
+        } else {
+            log.info("로그아웃 실패");
+        }
+    }
 }
 
 
