@@ -60,6 +60,6 @@ public class OAuthLoginService {
         } while (userRepository.findByNickname(nickname).isPresent());
         return nickname;
     }
-    
+
 
 }
