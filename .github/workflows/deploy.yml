@@ -73,16 +73,15 @@ jobs:
           envs: GITHUB_SHA
             #아래 명령들을 실행
             #스크립트
-            #1. 원격 서버에서 실행 중인 모든 Docker 컨테이너를 강제로 중지하고 제거
-            #2. Docker 이미지 레지스트리에서 latest 태그의 이미지를 pull
-            #3. Docker 컨테이너를 백그라운드에서, 호스트 8080 포트로 들어오는 요청을 컨테이너 8080 포트로 전달해서 이미지를 실행 , 커스텀 네트워크에 연결
+            #1. 커스텀 네트워크 생성
+            #2. 원격 서버에서 실행 중인 애플리케이션 Docker 컨테이너를 강제로 중지하고 제거
+            #3. Docker 이미지 레지스트리에서 latest 태그의 이미지를 pull
+            #4. Docker 컨테이너를 백그라운드에서, 호스트 8080 포트로 들어오는 요청을 컨테이너 8080 포트로 전달해서 이미지를 실행 , 커스텀 네트워크에 연결
             # -d : 백그라운드에서 컨테이너 실행되게 함, -p : 이미지 실행 포트 지정 [host port number:container port number]
-          #4. 사용하지 않는 이미지 정리
+            #5. 사용하지 않는 이미지 정리
           script: |
             sudo docker network create karma-network || true
-            # 기존에 실행 중인 karma-container를 중지 및 제거
             sudo docker rm -f karma-container || true
             sudo docker pull ${{ secrets.DOCKER_REPO }}:latest
-            # 새 컨테이너 실행 시 고정된 이름으로 설정
             sudo docker run -d -p 8080:8080 --network karma-network --name karma-container ${{ secrets.DOCKER_REPO }}:latest
             sudo docker image prune -f
