@@ -80,7 +80,9 @@ jobs:
           #4. 사용하지 않는 이미지 정리
           script: |
             sudo docker network create karma-network || true
-            sudo docker rm -f $(sudo docker ps -qa)
+            # 기존에 실행 중인 karma-container를 중지 및 제거
+            sudo docker rm -f karma-container || true
             sudo docker pull ${{ secrets.DOCKER_REPO }}:latest
-            sudo docker run -d -p 8080:8080 --network karma-network ${{ secrets.DOCKER_REPO }}:latest
+            # 새 컨테이너 실행 시 고정된 이름으로 설정
+            sudo docker run -d -p 8080:8080 --network karma-network --name karma-container ${{ secrets.DOCKER_REPO }}:latest
             sudo docker image prune -f
