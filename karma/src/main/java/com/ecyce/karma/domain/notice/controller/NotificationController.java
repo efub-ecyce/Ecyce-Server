@@ -30,7 +30,7 @@ public class NotificationController {
 
 
 
-     /* 클라이언트 구독 */
+     /* 클라이언트에서  구독 */
     @GetMapping(value = "/subscribe" , produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(@AuthUser User user){
         return noticeService.subscribe(user);
@@ -38,9 +38,9 @@ public class NotificationController {
     
 
     /* 서버에서 클라이언트로 알림 */
-    @PostMapping("/send-data")
+    @PostMapping("/send-notice")
     public void sendData(@AuthUser User user){
-        noticeService.notify(user , "data");
+        noticeService.notify(user);
     }
 
 }
