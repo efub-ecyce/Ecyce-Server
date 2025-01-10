@@ -27,4 +27,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
     // 판매 내역 조회 (특정 판매자의 전체 주문)
     @Query("select o from Orders o where o.sellerUser.userId = :userId")
     List<Orders> findAllBySellerUserId(@Param("userId") Long userId);
+
+    @Query("select o from Orders o where o.buyerUser.userId = :userId or o.sellerUser.userId = :userId")
+    List<Orders> findAllOrdersByUserId(@Param("userId") Long userId);
 }
