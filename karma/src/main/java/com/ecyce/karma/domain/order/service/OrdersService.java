@@ -4,6 +4,8 @@ import com.ecyce.karma.domain.order.dto.OrderCreateRequestDto;
 import com.ecyce.karma.domain.order.dto.OrderCreateResponseDto;
 import com.ecyce.karma.domain.order.dto.OrderOverviewResponseDto;
 import com.ecyce.karma.domain.order.dto.OrderResponseDto;
+import com.ecyce.karma.domain.order.entity.OrderState;
+import com.ecyce.karma.domain.order.entity.OrderStatusChangedEvent;
 import com.ecyce.karma.domain.order.entity.Orders;
 import com.ecyce.karma.domain.order.repository.OrdersRepository;
 import com.ecyce.karma.domain.product.entity.Product;
@@ -17,6 +19,7 @@ import com.ecyce.karma.global.exception.ErrorCode;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +30,7 @@ public class OrdersService {
     private final OrdersRepository orderRepository;
     private final ProductRepository productRepository;
     private final ProductOptionRepository productOptionRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 주문 생성
     public OrderCreateResponseDto createOrder(OrderCreateRequestDto requestDto, User buyer) {
@@ -39,6 +43,8 @@ public class OrdersService {
                 requestDto.getOrderCount());
 
         Orders savedOrder = orderRepository.save(order);
+        // 이벤트 호출
+        updateOrderStatus(savedOrder.getOrderId(),  OrderState.접수완료);
 
         return OrderCreateResponseDto.from(savedOrder);
     }
@@ -91,6 +97,11 @@ public class OrdersService {
             throw new CustomException(ErrorCode.ORDER_ACCESS_DENIED);
         }
         order.acceptOrReject(accepted);
+        // 이벤트 호출
+        if(accepted == false){
+            updateOrderStatus(order.getOrderId(),  OrderState.주문거절);
+        }
+        else updateOrderStatus(order.getOrderId(),  OrderState.제작대기);
     }
 
     // 제작 시작
@@ -101,6 +112,8 @@ public class OrdersService {
             throw new CustomException(ErrorCode.ORDER_ACCESS_DENIED);
         }
         order.startProduction();
+        // 이벤트 호출
+        updateOrderStatus(order.getOrderId(),  OrderState.제작중);
     }
 
     // 제작 완료
@@ -111,6 +124,8 @@ public class OrdersService {
             throw new CustomException(ErrorCode.ORDER_ACCESS_DENIED);
         }
         order.completeProduction();
+        // 이벤트 호출
+        updateOrderStatus(order.getOrderId(),  OrderState.제작완료);
     }
 
     // 배송 시작
@@ -121,6 +136,8 @@ public class OrdersService {
             throw new CustomException(ErrorCode.ORDER_ACCESS_DENIED);
         }
         order.startShipping(deliveryCompany,invoiceNumber);
+        // 이벤트 호출
+        updateOrderStatus(order.getOrderId(),  OrderState.배송중);
     }
 
     // 구매 확정
@@ -143,5 +160,18 @@ public class OrdersService {
         }
 
         order.cancelOrder();
+        // 이벤트 호출
+        updateOrderStatus(order.getOrderId(),  OrderState.주문취소);
+    }
+
+    /* 주문상태 변경 이벤트 리스너 */
+    public void updateOrderStatus(Long orderId, OrderState newStatus) {
+        Orders order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+        order.changeOrderState(newStatus);
+        orderRepository.save(order);
+
+        // 상태 변경 이벤트 발행
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(order.getBuyerUser(), order));
     }
 }

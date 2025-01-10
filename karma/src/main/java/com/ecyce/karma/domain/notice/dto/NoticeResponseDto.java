@@ -66,7 +66,4 @@ public record NoticeResponseDto(
         );
     }
 
-
-
-
 }

@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -43,7 +42,7 @@ public class NoticeService {
     }
 
     /* 알림 보낼  것 필터링*/
-    private NoticeResponseDto createNotice(Orders order, User user) {
+    public NoticeResponseDto createNotice(Orders order, User user) {
         if (OrderState.접수완료.equals(order.getOrderState()) && order.getSellerUser().getUserId().equals(user.getUserId())) {
             return NoticeResponseDto.toSeller(order, user);
         } else if (OrderState.주문거절.equals(order.getOrderState())) {
@@ -113,6 +112,7 @@ public class NoticeService {
 
         return emitter;
     }
+
 
 
 }
