@@ -134,4 +134,9 @@ public class Orders extends BaseTimeEntity {
         }
         this.orderState = OrderState.주문취소;
     }
+
+    /* 주문 상태 변경 */
+    public void changeOrderState(OrderState newStatus){
+        this.orderState = newStatus;
+    }
 }
