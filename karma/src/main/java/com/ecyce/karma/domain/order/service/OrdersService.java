@@ -165,7 +165,7 @@ public class OrdersService {
     }
 
     /* 주문상태 변경 이벤트 리스너 */
-    public void updateOrderStatus(Long orderId, OrderState newStatus) {
+    private void updateOrderStatus(Long orderId, OrderState newStatus) {
         Orders order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
         order.changeOrderState(newStatus);
