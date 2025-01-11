@@ -84,9 +84,10 @@ public class NoticeService {
     * */
     private void sendToClient(Long userId , Object data){
         SseEmitter emitter = emitterRepository.get(userId);
+        String eventId = userId + "_" + System.currentTimeMillis();
         if(emitter != null){
             try{
-                emitter.send(SseEmitter.event().id(String.valueOf(userId)).name("sse_notice").data(data));
+                emitter.send(SseEmitter.event().id(eventId).name("sse_notice").data(data));
             }catch (IOException exception){
                 emitterRepository.deleteById(userId);
                 emitter.completeWithError(exception);
